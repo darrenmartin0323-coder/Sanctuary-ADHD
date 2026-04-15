@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADHD Reset Sanctuary</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root { 
+    --bg: #faf8f4; 
+    --text: #3d3530; 
+    --card: rgba(255,255,255,0.85); 
+    --border: rgba(200,190,178,0.4); 
+    --sage: #8aab8a; 
+    --clay: #d4a373;
+    --sky: #a8dadc;
+    --info-bg: rgba(168, 218, 220, 0.15);
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1.5rem; line-height: 1.6; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 1.8rem; backdrop-filter: blur(12px); margin-bottom: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+  
+  /* Support Info Box */
+  .info-box { background: var(--info-bg); border-left: 4px solid var(--sky); padding: 1rem 1.2rem; border-radius: 0 12px 12px 0; margin-bottom: 1.5rem; font-size: 0.9rem; opacity: 0.9; }
+  .info-box strong { color: #2b595a; }
+
+  .btn-primary { background: var(--sage); color: white; padding: 0.8rem 1.6rem; border-radius: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; text-align: center; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(138,171,138,0.3); }
+  .btn-secondary { background: var(--sky); color: #2b595a; padding: 0.8rem 1.6rem; border-radius: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; text-align: center; }
+  .btn-secondary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(168,218,220,0.4); }
+
+  .tab-btn { padding: 0.6rem 1.2rem; border-radius: 999px; cursor: pointer; border: none; background: transparent; font-weight: 500; opacity: 0.6; transition: 0.3s; white-space: nowrap; font-size: 0.9rem; }
+  .tab-btn.active { background: var(--sage); color: white; opacity: 1; box-shadow: 0 4px 10px rgba(138,171,138,0.2); }
+  
+  textarea, input, select { width: 100%; background: rgba(255,255,255,0.7); border: 1.5px solid #e5e0d8; border-radius: 14px; padding: 0.9rem; outline: none; font-family: inherit; transition: 0.2s; font-size: 1rem; }
+  textarea:focus, input:focus { border-color: var(--sage); background: white; }
+  
+  .timer-num { font-size: 4rem; font-weight: 700; color: var(--sage); letter-spacing: -2px; margin: 0; line-height: 1; }
+  .stopwatch-num { font-size: 3rem; font-weight: 700; color: var(--clay); letter-spacing: -2px; margin: 0; line-height: 1; }
+  
+  /* Buddy & Breathing Animation */
+  .blob-container { position: relative; width: 80px; height: 80px; margin: 0 auto 15px; }
+  .buddy-blob { width: 100%; height: 100%; background: var(--sky); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 8s ease-in-out infinite alternate; box-shadow: 0 10px 20px rgba(168,218,220,0.3); }
+  @keyframes morph { 0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: scale(1); } 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: scale(1.05); } }
+
+  .breathe-circle { width: 120px; height: 120px; background: rgba(168,218,220,0.4); border: 4px solid var(--sky); border-radius: 50%; margin: 2rem auto; animation: breathe 19s infinite ease-in-out; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #2b595a; }
+  @keyframes breathe {
+      0% { transform: scale(1); opacity: 0.6; }
+      21% { transform: scale(1.8); opacity: 1; } /* 4s Inhale */
+      57% { transform: scale(1.8); opacity: 1; } /* 7s Hold */
+      100% { transform: scale(1); opacity: 0.6; } /* 8s Exhale */
+  }
+
+  /* Dopa Menu Items */
+  .dopa-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  .dopa-card { padding: 1rem; background: white; border-radius: 16px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+  .dopa-card:hover { border-color: var(--sage); transform: scale(1.01); background: rgba(138,171,138,0.05); }
+  .dopa-content { flex-grow: 1; transition: 0.3s; }
+  .dopa-delete { background: none; border: none; color: #b07070; font-size: 1.2rem; cursor: pointer; padding: 0 5px; opacity: 0.5; }
+  .dopa-delete:hover { opacity: 1; }
+  
+  .badge { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; padding: 4px 10px; border-radius: 8px; margin-left: 10px; }
+  .badge-starter { background: #e9edc9; color: #606c38; }
+  .badge-side { background: #faedcd; color: #d4a373; }
+  .badge-main { background: #dbeafe; color: #1e40af; }
+
+  /* Checklists */
+  .checklist-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 1.05rem; cursor: pointer; }
+  .checklist-box { width: 24px; height: 24px; border: 2px solid var(--sage); border-radius: 6px; flex-shrink: 0; transition: 0.2s; }
+  .checklist-item.done .checklist-box { background: var(--sage); }
+  .checklist-item.done span { opacity: 0.5; text-decoration: line-through; }
+
+  /* Confetti */
+  .confetti { position: fixed; z-index: 9999; pointer-events: none; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div style="max-width: 650px; margin: 0 auto;">
+  <header style="margin-bottom: 2rem; text-align: center;">
+    <h1 style="font-family: 'Lora', serif; font-size: 2.5rem; font-style: italic; margin-bottom: 0.5rem; color: #2d2621;">The Reset Sanctuary</h1>
+    <div style="display: flex; justify-content: center; gap: 20px; opacity: 0.6; font-size: 0.95rem;">
+        <span id="streak-display">🔥 0 Day Streak</span>
+        <span id="date-display"></span>
+    </div>
+  </header>
+
+  <!-- Horizontal Scrolling Nav -->
+  <nav style="display: flex; gap: 8px; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; -ms-overflow-style: none;">
+    <button class="tab-btn active" onclick="switchTab('focus')">🎯 Focus</button>
+    <button class="tab-btn" onclick="switchTab('bridge')">🌉 Bridge</button>
+    <button class="tab-btn" onclick="switchTab('decide')">🎲 Decide</button>
+    <button class="tab-btn" onclick="switchTab('parking')">🚧 Parking</button>
+    <button class="tab-btn" onclick="switchTab('dump')">☁️ Dump</button>
+    <button class="tab-btn" onclick="switchTab('time')">⏱️ Time Check</button>
+    <button class="tab-btn" onclick="switchTab('dopa')">⚡ Dopa-Menu</button>
+    <button class="tab-btn" onclick="switchTab('sos')">🛟 SOS</button>
+    <button class="tab-btn" onclick="switchTab('habit')">✨ Daily</button>
+    <button class="tab-btn" onclick="switchTab('history')">📜 Archive</button>
+  </nav>
+
+  <!-- 1. FOCUS PANEL -->
+  <div id="panel-focus" class="tab-panel">
+    <div class="info-box">
+      <strong>How to use this:</strong> If "Clean Kitchen" is too big, make your focus "Put one fork in the dishwasher." Pick the absolute smallest step. Use the Slicer if you feel stuck.
+    </div>
+    <div class="card">
+      <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1.2rem;">The One Thing</h3>
+      <div style="display: flex; gap: 12px; margin-bottom: 1rem;">
+        <input type="text" id="main-task" placeholder="What is your tiny focus right now?" oninput="saveData()">
+        <button onclick="sliceTask()" class="btn-primary">Slice</button>
+      </div>
+      <div id="steps-container" style="display: none; margin-bottom: 2rem;"></div>
+      
+      <div style="padding-top: 2rem; border-top: 1px solid var(--border); text-align: center;">
+        <div class="blob-container"><div class="buddy-blob"></div></div>
+        
+        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <select id="timer-duration" onchange="updateTimerDisplay()" style="width: auto; padding: 0.4rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: var(--sage); border-color: var(--sage); cursor: pointer;">
+                <option value="2">2 Minutes</option>
+                <option value="5" selected>5 Minutes</option>
+                <option value="10">10 Minutes</option>
+                <option value="15">15 Minutes</option>
+                <option value="25">25 Minutes</option>
+            </select>
+        </div>
+
+        <div class="timer-num" id="timer">05:00</div>
+        
+        <div style="display: flex; justify-content: center; gap: 15px; align-items: center; flex-wrap: wrap; margin-top: 15px;">
+            <button onclick="toggleTimer()" class="btn-primary" id="timer-btn" style="min-width: 140px;">Start Dash</button>
+            <select id="noise-type" onchange="changeNoise()" style="width: auto;">
+                <option value="none">🔇 Silence</option>
+                <option value="brown">🟫 Brown Noise</option>
+                <option value="pink">🌸 Pink Noise</option>
+                <option value="white">⚪ White Noise</option>
+            </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. TRANSITION BRIDGE -->
+  <div id="panel-bridge" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> Task-switching is physically uncomfortable for ADHD brains. Don't jump straight into work. Use this checklist to bridge the gap between "relaxing" and "doing."
+    </div>
+    <div class="card">
+      <h3 style="font-weight: 600; margin-bottom: 1.5rem; font-size: 1.2rem;">The Transition Bridge</h3>
+      
+      <div class="checklist-item" onclick="toggleChecklist(this)">
+          <div class="checklist-box"></div><span>Put phone face down out of arm's reach.</span>
+      </div>
+      <div class="checklist-item" onclick="toggleChecklist(this)">
+          <div class="checklist-box"></div><span>Stand up and physically stretch your arms.</span>
+      </div>
+      <div class="checklist-item" onclick="toggleChecklist(this)">
+          <div class="checklist-box"></div><span>Walk to your workspace or task area.</span>
+      </div>
+      <div class="checklist-item" onclick="toggleChecklist(this)">
+          <div class="checklist-box"></div><span>Sit down. Do absolutely NOTHING for 1 minute.</span>
+      </div>
+
+      <div style="margin-top: 2rem; text-align: center; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+          <div class="timer-num" id="bridge-timer" style="color: var(--sky); font-size: 3rem;">01:00</div>
+          <button onclick="startBridgeTimer()" class="btn-secondary" id="bridge-btn" style="margin-top: 10px;">Start 1-Min Rest</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. DECISION SPINNER -->
+  <div id="panel-decide" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> Stuck in analysis paralysis? Type out the 3-5 things you are debating doing. Click the button. The universe will choose one. You must obey the universe.
+    </div>
+    <div class="card">
+      <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1.2rem;">Anti-Paralysis Spinner</h3>
+      <textarea id="spinner-inputs" rows="5" placeholder="Option 1 (e.g., Do the dishes)&#10;Option 2 (e.g., Reply to email)&#10;Option 3 (e.g., Take a shower)"></textarea>
+      
+      <button onclick="spinDecide()" class="btn-primary" style="width: 100%; margin-top: 1rem; background: var(--clay);">Choose For Me</button>
+      
+      <div id="spinner-result" style="display:none; margin-top: 1.5rem; padding: 1.5rem; background: rgba(212,163,115,0.15); border: 2px dashed var(--clay); border-radius: 16px; text-align: center;">
+          <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--clay); text-transform: uppercase;">The universe says:</h4>
+          <p id="spinner-choice" style="font-size: 1.5rem; font-weight: 700; margin: 10px 0; color: #3d3530;"></p>
+          <p style="font-size: 0.85rem; opacity: 0.7; font-style: italic;">Ignore all other options completely.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. PARKING LOT -->
+  <div id="panel-parking" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> Did you remember you need to buy cat food while you were writing an email? Don't switch tasks! Dump the thought here to get it out of your brain, and return to your main focus.
+    </div>
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-weight: 600; font-size: 1.2rem;">Distraction Parking Lot 🚧</h3>
+        <button onclick="clearParking()" style="font-size: 0.85rem; color: #b07070; font-weight: 600; cursor: pointer; background:none; border:none;">Clear Lot</button>
+      </div>
+      <textarea id="parking-lot" rows="10" placeholder="Park side-quests, random thoughts, and sudden to-dos here..." oninput="saveData()"></textarea>
+    </div>
+  </div>
+
+  <!-- 5. BRAIN DUMP -->
+  <div id="panel-dump" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> When your working memory is overloaded, anxiety spikes. Get every thought, random to-do, and worry out of your head and onto this page to free up your mental RAM.
+    </div>
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-weight: 600; font-size: 1.2rem;">Mental Offload</h3>
+        <button onclick="archiveDump()" style="font-size: 0.85rem; color: var(--clay); font-weight: 600; cursor: pointer; background:none; border:none;">Archive & Clear</button>
+      </div>
+      <textarea id="brain-dump" rows="16" placeholder="Everything in your head goes here. Don't worry about spelling or order. Just empty the tank..." oninput="saveData()"></textarea>
+    </div>
+  </div>
+
+  <!-- 6. TIME BLINDNESS -->
+  <div id="panel-time" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> We often avoid tasks because we think they will take hours. Guess how long a task will take, time yourself actually doing it, and log it to prove to your brain it's not that bad.
+    </div>
+    <div class="card">
+      <h3 style="font-weight: 600; margin-bottom: 1rem; font-size: 1.2rem;">Time Blindness Calibrator</h3>
+      
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 1.5rem;">
+          <input type="text" id="tb-task" placeholder="Task (e.g. Empty dishwasher)">
+          <input type="number" id="tb-est" placeholder="Est. Mins" min="1">
+      </div>
+
+      <div style="text-align: center; padding: 1.5rem; background: rgba(0,0,0,0.03); border-radius: 16px; margin-bottom: 2rem;">
+          <div class="stopwatch-num" id="sw-display">00:00</div>
+          <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+              <button onclick="toggleStopwatch()" id="sw-btn" class="btn-secondary" style="background: var(--clay); color: white;">Start Stopwatch</button>
+              <button onclick="logTimeCheck()" class="btn-primary">Log It!</button>
+          </div>
+      </div>
+
+      <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; color: var(--clay);">Reality Logs</h4>
+      <div id="time-log-container" style="max-height: 200px; overflow-y: auto;">
+          <!-- Logs render here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. DOPA-MENU -->
+  <div id="panel-dopa" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> ADHD brains crave dopamine. When you are under-stimulated, you might seek unhealthy quick fixes. Intentionally click an item below to boost your dopamine, then get back to your task!
+    </div>
+    <div class="card">
+        <h3 style="font-weight: 600; margin-bottom: 1.5rem; font-size: 1.2rem;">Dopamine Menu</h3>
+        
+        <div style="margin-bottom: 2rem;">
+            <h4 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; color: var(--clay); font-weight: 700;">Starters (Quick Wins)</h4>
+            <div id="dopa-quick-list" class="dopa-grid"></div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h4 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; color: var(--sage); font-weight: 700;">Mains (Deep Reset)</h4>
+            <div id="dopa-main-list" class="dopa-grid"></div>
+        </div>
+
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+            <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;">Add your own reward:</h4>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="new-dopa-item" placeholder="e.g., Pet the dog">
+                <select id="new-dopa-type" style="width: auto;">
+                    <option value="quick">Starter (Quick)</option>
+                    <option value="main">Main (Deep)</option>
+                </select>
+                <button onclick="addDopaItem()" class="btn-primary">Add</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- 8. SOS GROUNDING -->
+  <div id="panel-sos" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> Overwhelmed? RSD flaring up? Task paralysis causing panic? Stop. Do not try to work. Watch the circle expand and contract, and match your breathing to it. Then do the 5-4-3-2-1 list below to return to your body.
+    </div>
+    <div class="card" style="text-align: center;">
+      <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: 1.4rem; color: #b07070;">SOS Grounding</h3>
+      <p style="font-size: 0.9rem; opacity: 0.8;">Breathe in for 4, hold for 7, exhale for 8.</p>
+      
+      <div class="breathe-circle">Breathe</div>
+
+      <div style="text-align: left; background: rgba(0,0,0,0.03); padding: 1.5rem; border-radius: 16px; margin-top: 2rem;">
+          <h4 style="font-weight: 700; margin-bottom: 1rem; color: #2d2621;">The 5-4-3-2-1 Method</h4>
+          <div class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-box"></div><span>Acknowledge <strong>5</strong> things you can see.</span>
+          </div>
+          <div class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-box"></div><span>Acknowledge <strong>4</strong> things you can physically feel.</span>
+          </div>
+          <div class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-box"></div><span>Acknowledge <strong>3</strong> things you can hear.</span>
+          </div>
+          <div class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-box"></div><span>Acknowledge <strong>2</strong> things you can smell.</span>
+          </div>
+          <div class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-box"></div><span>Acknowledge <strong>1</strong> thing you can taste.</span>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. DAILY HABITS -->
+  <div id="panel-habit" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> Routine reduces the number of decisions you have to make. Try to check these off every morning to build invisible momentum for the rest of your day.
+    </div>
+    <div class="card">
+      <h3 style="font-weight: 600; margin-bottom: 1.5rem; font-size: 1.2rem;">Non-Negotiables</h3>
+      <div id="habit-list">
+          <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. HISTORY PANEL -->
+  <div id="panel-history" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> Seeing what you have accomplished reminds your brain that you CAN do hard things. Old Brain Dumps are safely saved here so you never lose a good idea.
+    </div>
+    <div class="card">
+      <h3 style="font-weight: 600; margin-bottom: 1.5rem; font-size: 1.2rem;">The Archive</h3>
+      <div id="history-container" style="max-height: 450px; overflow-y: auto;">
+          <p style="text-align: center; opacity: 0.5; padding: 40px;">No archives found yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align: center; font-size: 0.8rem; opacity: 0.5; margin-top: 3rem; padding-bottom: 2rem;">
+      <p>All data stays securely on this device.</p>
+      <div style="margin-top: 10px; display: flex; justify-content: center; gap: 20px;">
+          <button onclick="exportData()" style="text-decoration: underline; background: none; border: none; cursor: pointer;">Download Backup File</button>
+      </div>
+  </footer>
+</div>
+
+<script>
+  // --- STATE MANAGEMENT ---
+  const DEFAULT_HABITS = ["Drink a glass of water", "5 mins of sunlight", "1 Minute Tidy", "No Phone for 15m"];
+  const DEFAULT_DOPA = {
+      quick: ["💧 Cold water splash", "🧘 3 Deep 'Sigh' breaths", "🍎 Something crunchy"],
+      main: ["🚶 Phone-free walk", "🎶 Dance to 3 songs", "🛀 Quick warm shower"]
+  };
+
+  let appData = {
+      task: "",
+      dump: "",
+      parkingLot: "",
+      history: [],
+      timeLogs: [],
+      streak: 0,
+      lastVisit: null,
+      dopa: DEFAULT_DOPA
+  };
+
+  // Load from local storage safely
+  try {
+      const saved = localStorage.getItem('sanctuary_data_v3');
+      if (saved) {
+          const parsed = JSON.parse(saved);
+          appData = { ...appData, ...parsed };
+      }
+  } catch(e) {
+      console.log("Starting fresh data.");
+  }
+
+  // --- NAVIGATION ---
+  function switchTab(id) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).style.display = 'block';
+    
+    const btns = document.querySelectorAll('.tab-btn');
+    btns.forEach(btn => {
+        if(btn.getAttribute('onclick').includes(id)) btn.classList.add('active');
+    });
+  }
+
+  // --- DATA SAVING ---
+  function saveData() {
+    appData.task = document.getElementById('main-task').value;
+    appData.dump = document.getElementById('brain-dump').value;
+    appData.parkingLot = document.getElementById('parking-lot').value;
+    try {
+        localStorage.setItem('sanctuary_data_v3', JSON.stringify(appData));
+    } catch(e) {}
+  }
+
+  // --- CONFETTI & CHIME ---
+  function fireConfetti() {
+      const colors = ['#8aab8a', '#d4a373', '#a8dadc', '#e9edc9'];
+      for(let i=0; i<40; i++) {
+          let conf = document.createElement('div');
+          conf.className = 'confetti';
+          conf.style.left = Math.random() * 100 + 'vw';
+          conf.style.top = '-10px';
+          conf.style.width = (Math.random() * 6 + 4) + 'px';
+          conf.style.height = (Math.random() * 6 + 4) + 'px';
+          conf.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+          document.body.appendChild(conf);
+          
+          conf.animate([
+              { transform: 'translateY(0) rotate(0)', opacity: 1 },
+              { transform: `translateY(100vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
+          ], { duration: 1500 + Math.random()*2000, easing: 'linear' });
+          
+          setTimeout(() => conf.remove(), 4000);
+      }
+  }
+
+  let audioCtx, noiseNode, gainNode;
+  function playChime() {
+      try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.type = "sine"; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+          osc.start(); osc.stop(audioCtx.currentTime + 1);
+      } catch(e) {}
+  }
+
+  function changeNoise() {
+    const type = document.getElementById('noise-type').value;
+    if (noiseNode) { noiseNode.stop(); noiseNode = null; }
+    if (type === 'none') return;
+    
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const bufferSize = audioCtx.sampleRate * 2;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        let lastOut = 0;
+
+        for (let i = 0; i < bufferSize; i++) {
+            let white = Math.random() * 2 - 1;
+            if (type === 'brown') { 
+                data[i] = (lastOut + (0.02 * white)) / 1.02; lastOut = data[i]; data[i] *= 3.5; 
+            } else if (type === 'pink') { 
+                data[i] = (white + lastOut) * 0.5; lastOut = white; data[i] *= 0.15; 
+            } else { 
+                data[i] = white * 0.05; 
+            }
+        }
+        noiseNode = audioCtx.createBufferSource();
+        noiseNode.buffer = buffer;
+        noiseNode.loop = true;
+        gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.12;
+        noiseNode.connect(gainNode).connect(audioCtx.destination);
+        noiseNode.start();
+    } catch(e) {}
+  }
+
+  // --- GENERAL CHECKLIST TOGGLE ---
+  function toggleChecklist(el) {
+    el.classList.toggle('done');
+    if(el.classList.contains('done')) {
+        fireConfetti();
+        playChime();
+    }
+  }
+
+  // --- SECTION: FOCUS TIMER ---
+  let timerInt, timeRemaining = 300; 
+
+  function updateTimerDisplay() {
+      if (timerInt) return; 
+      const mins = parseInt(document.getElementById('timer-duration').value);
+      timeRemaining = mins * 60;
+      renderTime();
+  }
+
+  function renderTime() {
+      const m = Math.floor(timeRemaining/60);
+      const s = timeRemaining%60;
+      document.getElementById('timer').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById('timer-btn');
+    if (timerInt) { 
+        clearInterval(timerInt); 
+        timerInt = null; 
+        btn.textContent = "Resume Dash"; 
+    } else {
+      if (!audioCtx && document.getElementById('noise-type').value !== 'none') changeNoise();
+      if(timeRemaining <= 0) updateTimerDisplay();
+
+      btn.textContent = "Pause";
+      timerInt = setInterval(() => {
+        timeRemaining--;
+        renderTime();
+        if(timeRemaining <= 0) { 
+            clearInterval(timerInt); 
+            timerInt = null;
+            btn.textContent = "Great Job!";
+            fireConfetti();
+            playChime();
+            alert("Timer complete! Take a breath, you did great."); 
+        }
+      }, 1000);
+    }
+  }
+
+  function sliceTask() {
+    const task = document.getElementById('main-task').value;
+    if(!task) return;
+    const container = document.getElementById('steps-container');
+    container.innerHTML = `
+      <div style="background: rgba(138,171,138,0.15); border: 1px solid var(--sage); border-radius: 18px; padding: 1.2rem;">
+        <h4 style="font-weight: 700; margin-bottom: 12px; font-size: 1rem; color: #4a6b4a;">Tiny Step Breakdown:</h4>
+        <ul style="font-size: 1rem; display: flex; flex-direction: column; gap: 10px;">
+          <li style="display:flex; gap:10px;"><span>✅</span> <span><strong>Step 1:</strong> Stand up and touch the item needed for "${task}".</span></li>
+          <li style="display:flex; gap:10px;"><span>✅</span> <span><strong>Step 2:</strong> Commit to just the timer duration of effort.</span></li>
+          <li style="display:flex; gap:10px;"><span>✅</span> <span><strong>Step 3:</strong> If you stop when the timer goes off, you still win.</span></li>
+        </ul>
+      </div>
+    `;
+    container.style.display = 'block';
+  }
+
+  // --- SECTION: BRIDGE TIMER ---
+  let bridgeInt, bridgeTime = 60;
+  function startBridgeTimer() {
+      if(bridgeInt) return;
+      const btn = document.getElementById('bridge-btn');
+      btn.textContent = "Resting...";
+      
+      bridgeInt = setInterval(() => {
+          bridgeTime--;
+          const s = bridgeTime.toString().padStart(2,'0');
+          document.getElementById('bridge-timer').textContent = `00:${s}`;
+          if(bridgeTime <= 0) {
+              clearInterval(bridgeInt);
+              bridgeInt = null;
+              bridgeTime = 60;
+              document.getElementById('bridge-timer').textContent = "01:00";
+              btn.textContent = "Start 1-Min Rest";
+              playChime();
+              fireConfetti();
+              alert("Bridge complete. You are ready to focus.");
+          }
+      }, 1000);
+  }
+
+  // --- SECTION: DECISION SPINNER ---
+  function spinDecide() {
+      const input = document.getElementById('spinner-inputs').value;
+      const lines = input.split('\n').filter(l => l.trim() !== '');
+      if (lines.length === 0) {
+          alert("Please type some options first!");
+          return;
+      }
+      
+      const choice = lines[Math.floor(Math.random() * lines.length)];
+      document.getElementById('spinner-choice').textContent = choice;
+      document.getElementById('spinner-result').style.display = 'block';
+      fireConfetti();
+      playChime();
+  }
+
+  // --- SECTION: PARKING LOT ---
+  function clearParking() {
+      if(confirm("Clear the parking lot?")) {
+          document.getElementById('parking-lot').value = "";
+          saveData();
+      }
+  }
+
+  // --- SECTION: TIME BLINDNESS STOPWATCH ---
+  let swInt, swSecs = 0, swRunning = false;
+  function toggleStopwatch() {
+      const btn = document.getElementById('sw-btn');
+      const display = document.getElementById('sw-display');
+      
+      if (swRunning) {
+          clearInterval(swInt);
+          swRunning = false;
+          btn.textContent = "Resume Stopwatch";
+      } else {
+          swRunning = true;
+          btn.textContent = "Pause Stopwatch";
+          swInt = setInterval(() => {
+              swSecs++;
+              const m = Math.floor(swSecs/60).toString().padStart(2,'0');
+              const s = (swSecs%60).toString().padStart(2,'0');
+              display.textContent = `${m}:${s}`;
+          }, 1000);
+      }
+  }
+
+  function logTimeCheck() {
+      const task = document.getElementById('tb-task').value || "Unnamed Task";
+      const est = document.getElementById('tb-est').value || "?";
+      
+      if(swRunning) toggleStopwatch(); // stop it if running
+      
+      const actM = Math.floor(swSecs/60);
+      const actS = swSecs%60;
+      const actualStr = `${actM}m ${actS}s`;
+
+      const log = { task, est: est + "m", act: actualStr };
+      appData.timeLogs.unshift(log);
+      if(appData.timeLogs.length > 20) appData.timeLogs.pop();
+      
+      saveData();
+      renderTimeLogs();
+      
+      // Reset
+      swSecs = 0;
+      document.getElementById('sw-display').textContent = "00:00";
+      document.getElementById('tb-task').value = "";
+      document.getElementById('tb-est').value = "";
+      document.getElementById('sw-btn').textContent = "Start Stopwatch";
+      fireConfetti();
+  }
+
+  function renderTimeLogs() {
+      const container = document.getElementById('time-log-container');
+      if (appData.timeLogs.length === 0) {
+          container.innerHTML = "<p style='text-align:center; opacity:0.5; padding: 10px;'>No logs yet.</p>";
+          return;
+      }
+      container.innerHTML = appData.timeLogs.map(l => `
+          <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 600; font-size: 0.9rem;">${l.task}</span>
+              <div style="font-size: 0.8rem; text-align: right;">
+                  <div style="opacity: 0.6;">Est: ${l.est}</div>
+                  <div style="color: var(--clay); font-weight: bold;">Act: ${l.act}</div>
+              </div>
+          </div>
+      `).join('');
+  }
+
+  // --- SECTION: DOPAMINE MENU ---
+  function renderDopa() {
+      const qList = document.getElementById('dopa-quick-list');
+      const mList = document.getElementById('dopa-main-list');
+      qList.innerHTML = ''; mList.innerHTML = '';
+
+      const createCard = (text, type, index) => {
+          const div = document.createElement('div');
+          div.className = 'dopa-card';
+          
+          const content = document.createElement('div');
+          content.className = 'dopa-content';
+          content.innerHTML = `<span>${text}</span> <span class="badge ${type==='quick'?'badge-starter':'badge-main'}">${type==='quick'?'Quick':'Deep'}</span>`;
+          
+          content.onclick = () => {
+              fireConfetti();
+              playChime();
+              content.style.opacity = '0.3';
+              content.style.textDecoration = 'line-through';
+              setTimeout(() => {
+                  content.style.opacity = '1';
+                  content.style.textDecoration = 'none';
+              }, 3000);
+          };
+
+          const delBtn = document.createElement('button');
+          delBtn.className = 'dopa-delete';
+          delBtn.innerHTML = '×';
+          delBtn.onclick = (e) => {
+              e.stopPropagation();
+              appData.dopa[type].splice(index, 1);
+              saveData();
+              renderDopa();
+          };
+
+          div.appendChild(content);
+          div.appendChild(delBtn);
+          return div;
+      };
+
+      if(appData.dopa && appData.dopa.quick) {
+        appData.dopa.quick.forEach((item, i) => qList.appendChild(createCard(item, 'quick', i)));
+      }
+      if(appData.dopa && appData.dopa.main) {
+        appData.dopa.main.forEach((item, i) => mList.appendChild(createCard(item, 'main', i)));
+      }
+  }
+
+  function addDopaItem() {
+      const input = document.getElementById('new-dopa-item');
+      const type = document.getElementById('new-dopa-type').value;
+      if (!input.value.trim()) return;
+      
+      if(!appData.dopa[type]) appData.dopa[type] = [];
+      appData.dopa[type].push(input.value.trim());
+      input.value = '';
+      saveData();
+      renderDopa();
+  }
+
+  // --- SECTION: HABITS ---
+  function renderHabits() {
+    const container = document.getElementById('habit-list');
+    container.innerHTML = DEFAULT_HABITS.map(h => `
+        <div class="checklist-item" onclick="toggleChecklist(this)" style="background: white; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+            <div class="checklist-box"></div><span>${h}</span>
+        </div>
+    `).join('');
+  }
+
+  // --- SECTION: ARCHIVE & HISTORY ---
+  function archiveDump() {
+    const text = document.getElementById('brain-dump').value;
+    if (!text.trim()) return;
+    const entry = { date: new Date().toLocaleDateString(), body: text };
+    appData.history.unshift(entry);
+    if(appData.history.length > 30) appData.history.pop();
+    
+    document.getElementById('brain-dump').value = "";
+    saveData();
+    renderHistory();
+    switchTab('history');
+    fireConfetti();
+  }
+
+  function renderHistory() {
+    const container = document.getElementById('history-container');
+    if (appData.history.length === 0) return;
+    container.innerHTML = appData.history.map(h => `
+      <div style="background: rgba(255,255,255,0.4); padding: 1.2rem; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 1rem;">
+        <div style="font-weight: 700; font-size: 0.75rem; color: var(--clay); margin-bottom: 8px;">${h.date}</div>
+        <div style="white-space: pre-wrap; font-size: 0.95rem; opacity: 0.9;">${h.body}</div>
+      </div>
+    `).join('');
+  }
+
+  function exportData() {
+    const text = appData.history.map(h => `${h.date}\n${h.body}\n---\n`).join('\n');
+    const blob = new Blob([text || "No archived data yet."], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'Sanctuary_Backup.txt'; a.click();
+  }
+
+  // --- INITIAL LOAD ---
+  window.onload = () => {
+    const today = new Date().toDateString();
+    document.getElementById('date-display').textContent = today;
+    
+    if (appData.lastVisit !== today) {
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (appData.lastVisit === yesterday.toDateString()) appData.streak++;
+        else if (appData.lastVisit !== null) appData.streak = 1;
+        else appData.streak = 1; 
+        appData.lastVisit = today;
+        saveData();
+    }
+
+    document.getElementById('streak-display').textContent = `🔥 ${appData.streak} Day Streak`;
+    document.getElementById('main-task').value = appData.task || "";
+    document.getElementById('brain-dump').value = appData.dump || "";
+    document.getElementById('parking-lot').value = appData.parkingLot || "";
+    
+    updateTimerDisplay();
+    renderHistory();
+    renderHabits();
+    renderDopa();
+    renderTimeLogs();
+  };
+</script>
+
+</body>
+</html>
