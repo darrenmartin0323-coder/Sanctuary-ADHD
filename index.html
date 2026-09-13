@@ -88,6 +88,7 @@
   <!-- Horizontal Scrolling Nav -->
   <nav style="display: flex; gap: 8px; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; -ms-overflow-style: none;">
     <button class="tab-btn active" onclick="switchTab('focus')">🎯 Focus</button>
+    <button class="tab-btn" onclick="switchTab('breathe')">🫁 Breathe</button>
     <button class="tab-btn" onclick="switchTab('bridge')">🌉 Bridge</button>
     <button class="tab-btn" onclick="switchTab('decide')">🎲 Decide</button>
     <button class="tab-btn" onclick="switchTab('parking')">🚧 Parking</button>
@@ -136,6 +137,54 @@
                 <option value="white">⚪ White Noise</option>
             </select>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b. BREATHING APP -->
+  <div id="panel-breathe" class="tab-panel" style="display:none;">
+    <div class="info-box">
+      <strong>How to use this:</strong> Feeling anxious, stuck, or scattered? Pick a breathing technique and follow the animated circle. Your nervous system will calm down naturally.
+    </div>
+    <div class="card">
+      <h3 style="font-weight: 600; margin-bottom: 1.5rem; font-size: 1.2rem;">Breathing Exercises</h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 2rem;">
+        <button onclick="startBreathing('box')" class="btn-primary" style="font-size: 0.9rem; padding: 0.7rem;">📦 Box Breathing</button>
+        <button onclick="startBreathing('478')" class="btn-primary" style="font-size: 0.9rem; padding: 0.7rem;">💤 4-7-8 (Sleep)</button>
+        <button onclick="startBreathing('478')" class="btn-primary" style="font-size: 0.9rem; padding: 0.7rem;">😌 4-4-4 (Calm)</button>
+        <button onclick="startBreathing('energize')" class="btn-primary" style="font-size: 0.9rem; padding: 0.7rem;">⚡ Energize</button>
+      </div>
+
+      <div style="text-align: center; padding: 2rem; background: rgba(168,218,220,0.08); border-radius: 20px; position: relative;">
+        <div id="breathing-state" style="font-size: 0.85rem; font-weight: 600; color: var(--sage); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; height: 20px;">Ready to breathe</div>
+
+        <div id="breathe-viz" style="width: 160px; height: 160px; margin: 0 auto 20px; position: relative;">
+          <div id="breathing-circle" style="width: 100%; height: 100%; background: rgba(138,171,138,0.3); border: 3px solid var(--sage); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--sage); font-size: 1.1rem; transition: transform 0.1s linear;">
+            <span id="breath-counter">--</span>
+          </div>
+        </div>
+
+        <div id="breathing-info" style="font-size: 0.9rem; margin-bottom: 1.5rem; color: #2b595a; line-height: 1.6; height: 50px; display: flex; align-items: center; justify-content: center;">
+          <span>Choose a technique to begin</span>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button id="breathing-start-btn" onclick="toggleBreathing()" class="btn-secondary" style="display:none;">Start Exercise</button>
+          <button id="breathing-stop-btn" onclick="stopBreathing()" class="btn-primary" style="display:none; background: #b07070;">Stop Exercise</button>
+        </div>
+
+        <div id="breathing-rounds" style="margin-top: 1.5rem; font-size: 0.85rem; opacity: 0.7;"></div>
+      </div>
+
+      <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+        <h4 style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; color: var(--clay); margin-bottom: 1rem;">Quick Tips</h4>
+        <ul style="font-size: 0.9rem; opacity: 0.85; line-height: 1.8;">
+          <li>🫁 <strong>Box Breathing:</strong> 4 in, 4 hold, 4 out, 4 hold. Perfect for anxiety.</li>
+          <li>💤 <strong>4-7-8:</strong> 4 in, 7 hold, 8 out. Activates your rest & digest system.</li>
+          <li>😌 <strong>4-4-4:</strong> 4 in, 4 hold, 4 out. Simple & balanced.</li>
+          <li>⚡ <strong>Energize:</strong> 3 quick rounds of fast breathing to boost energy.</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -745,6 +794,139 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = 'Sanctuary_Backup.txt'; a.click();
+  }
+
+  // --- SECTION: BREATHING EXERCISES ---
+  let breathingInterval, breathingActive = false, breathingPhase = '', breathingDuration = 0;
+  let breathingRound = 0, breathingTotalRounds = 4;
+  let currentBreathingTechnique = null;
+
+  const breathingTechniques = {
+    box: { name: 'Box Breathing', phases: [
+      { phase: 'Inhale', duration: 4 },
+      { phase: 'Hold', duration: 4 },
+      { phase: 'Exhale', duration: 4 },
+      { phase: 'Hold', duration: 4 }
+    ], rounds: 4 },
+    '478': { name: '4-7-8 Breathing', phases: [
+      { phase: 'Inhale', duration: 4 },
+      { phase: 'Hold', duration: 7 },
+      { phase: 'Exhale', duration: 8 }
+    ], rounds: 4 },
+    '444': { name: '4-4-4 Breathing', phases: [
+      { phase: 'Inhale', duration: 4 },
+      { phase: 'Hold', duration: 4 },
+      { phase: 'Exhale', duration: 4 }
+    ], rounds: 5 },
+    energize: { name: 'Energize Breathing', phases: [
+      { phase: 'Quick Inhales', duration: 3 },
+      { phase: 'Quick Exhales', duration: 3 },
+      { phase: 'Rest', duration: 2 }
+    ], rounds: 3 }
+  };
+
+  function startBreathing(technique) {
+    if (breathingActive) return;
+    currentBreathingTechnique = technique;
+    const tech = breathingTechniques[technique];
+
+    document.getElementById('breathing-start-btn').style.display = 'inline-block';
+    document.getElementById('breathing-info').innerHTML = `<span><strong>${tech.name}</strong> — ${tech.rounds} rounds</span>`;
+    document.getElementById('breathing-rounds').textContent = `Tap Start to begin`;
+  }
+
+  function toggleBreathing() {
+    if (!currentBreathingTechnique) return;
+
+    if (breathingActive) {
+      stopBreathing();
+      return;
+    }
+
+    breathingActive = true;
+    breathingRound = 1;
+    let phaseIndex = 0;
+    let phaseTime = 0;
+
+    const tech = breathingTechniques[currentBreathingTechnique];
+    document.getElementById('breathing-start-btn').style.display = 'none';
+    document.getElementById('breathing-stop-btn').style.display = 'inline-block';
+
+    const runPhase = () => {
+      if (!breathingActive) return;
+
+      if (phaseIndex >= tech.phases.length) {
+        phaseIndex = 0;
+        breathingRound++;
+        if (breathingRound > tech.rounds) {
+          stopBreathing();
+          fireConfetti();
+          playChime();
+          alert(`Great job! You completed ${tech.rounds} rounds of ${tech.name}.`);
+          return;
+        }
+      }
+
+      const currentPhase = tech.phases[phaseIndex];
+      breathingPhase = currentPhase.phase;
+      breathingDuration = currentPhase.duration;
+      phaseTime = breathingDuration;
+
+      document.getElementById('breathing-state').textContent = currentPhase.phase;
+      updateBreathingCircle();
+
+      const phaseInterval = setInterval(() => {
+        if (!breathingActive) { clearInterval(phaseInterval); return; }
+
+        phaseTime--;
+        document.getElementById('breath-counter').textContent = phaseTime > 0 ? phaseTime : '✓';
+        updateBreathingCircle();
+
+        if (phaseTime <= 0) {
+          clearInterval(phaseInterval);
+          phaseIndex++;
+          playChime();
+          setTimeout(runPhase, 200);
+        }
+      }, 1000);
+    };
+
+    runPhase();
+  }
+
+  function updateBreathingCircle() {
+    const circle = document.getElementById('breathing-circle');
+    const tech = breathingTechniques[currentBreathingTechnique];
+    const totalDuration = tech.phases.reduce((sum, p) => sum + p.duration, 0);
+
+    let scale = 1;
+    if (breathingPhase.includes('Inhale') || breathingPhase === 'Quick Inhales') {
+      scale = 1 + (1.8 - 1) * ((breathingDuration - phaseTime) / breathingDuration);
+    } else if (breathingPhase.includes('Exhale') || breathingPhase === 'Quick Exhales') {
+      scale = 1.8 - (1.8 - 1) * ((breathingDuration - phaseTime) / breathingDuration);
+    } else if (breathingPhase === 'Hold') {
+      scale = 1.8;
+    } else {
+      scale = 1;
+    }
+
+    circle.style.transform = `scale(${scale})`;
+
+    if (breathingRound > 0) {
+      document.getElementById('breathing-rounds').textContent = `Round ${breathingRound} of ${breathingTechniques[currentBreathingTechnique].rounds}`;
+    }
+  }
+
+  function stopBreathing() {
+    breathingActive = false;
+    currentBreathingTechnique = null;
+    document.getElementById('breathing-start-btn').style.display = 'none';
+    document.getElementById('breathing-stop-btn').style.display = 'none';
+    document.getElementById('breathing-state').textContent = 'Ready to breathe';
+    document.getElementById('breath-counter').textContent = '--';
+    document.getElementById('breathing-circle').style.transform = 'scale(1)';
+    document.getElementById('breathing-info').innerHTML = '<span>Choose a technique to begin</span>';
+    document.getElementById('breathing-rounds').textContent = '';
   }
 
   // --- INITIAL LOAD ---
